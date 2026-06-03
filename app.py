@@ -1,4 +1,3 @@
-
 import streamlit as st
 import google.generativeai as genai
 from datetime import datetime
@@ -65,7 +64,8 @@ model = None
 if api_key:
     try:
         genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Model updated to latest production build to prevent NotFound error
+        model = genai.GenerativeModel('gemini-2.5-flash')
         st.sidebar.success("🔗 AI Core Linked Successfully")
     except Exception as api_err:
         st.sidebar.error("⚠️ Encryption Sync Failed.")
@@ -114,11 +114,14 @@ with tab1:
                 st.warning("Data Void: Log at least a few hourly vectors.")
             else:
                 with st.spinner("Decoding timeline anomalies..."):
-                    prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
-                    response = model.generate_content(prompt)
-                    st.markdown("<div style='background: #020617; padding: 20px; border-left: 4px solid #06B6D4; border-radius: 8px;'>", unsafe_allow_html=True)
-                    st.write(response.text)
-                    st.markdown("</div>", unsafe_allow_html=True)
+                    try:
+                        prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
+                        response = model.generate_content(prompt)
+                        st.markdown("<div style='background: #020617; padding: 20px; border-left: 4px solid #06B6D4; border-radius: 8px;'>", unsafe_allow_html=True)
+                        st.write(response.text)
+                        st.markdown("</div>", unsafe_allow_html=True)
+                    except Exception as e:
+                        st.error(f"AI Process Error: {e}")
 
 # ==================== TAB 2: METRICS & ERROR INGESTION ====================
 with tab2:
@@ -200,4 +203,4 @@ with tab3:
                 if st.session_state.qbank_errors:
                     qbank_summary = pd.DataFrame(st.session_state.qbank_errors).to_string(index=False)
                 
-                prompt = f"Create a tactical {report_type} for an MBBS student based on this data:\nNotes Pages & QBank:\n{metrics_summary}\n\nErrors:\n{qbank_summary}\n\nTime logs:\n{all_schedules}\n\nGive: 1. Pages velocity & QBank accuracy rate %, 2. Weakest subjects/topics cluster, 3. Strategic BTR review counter-attack plan."
+                try:
