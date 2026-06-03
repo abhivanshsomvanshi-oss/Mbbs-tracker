@@ -102,7 +102,6 @@ with tab1:
     
     for idx, slot in enumerate(slots):
         current_val = st.session_state.daily_logs[selected_date][slot]
-        # Late night active styling anchor for MBBS night owls
         label = f"🌙 {slot}" if idx < 5 or idx >= 22 else f"☀️ {slot}"
         
         if idx < 12:
@@ -164,7 +163,6 @@ with tab2:
                         st.session_state.qbank_errors.append(data)
                         st.toast(f"Successfully tracked: {data['Topic']}")
                     except Exception as e:
-                        # Crash prevention loop fallback
                         st.error(f"Could not parse one of the screenshots. Ensuring app safety.")
                 st.success("Batch execution completed!")
 
@@ -204,3 +202,5 @@ with tab3:
                 try:
                     response = model.generate_content(prompt)
                     st.markdown("---")
+                    st.markdown("### 📘 Your Tailored Revision Strategy")
+                    st.write(response.text)
