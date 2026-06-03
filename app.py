@@ -16,13 +16,10 @@ st.set_page_config(
 # Tagda Medical-Tech Cyber Graphics & Custom CSS Styling
 st.markdown("""
     <style>
-    /* Main Background with Deep Tech Gradient */
     .stApp { 
         background: radial-gradient(circle at top left, #0B132B 0%, #010409 100%) !important; 
         color: #E2E8F0 !important; 
     }
-    
-    /* Medical High-Tech Headers */
     h1 { 
         color: #38BDF8 !important; 
         font-family: 'Inter', sans-serif; 
@@ -35,8 +32,6 @@ st.markdown("""
         font-family: 'Inter', sans-serif; 
         font-weight: 700 !important; 
     }
-    
-    /* Glassmorphism Premium Grid Cards for Inputs */
     div[data-testid="stForm"], div.stBlock, .stTabs {
         background: rgba(30, 41, 59, 0.45) !important;
         border: 1px solid rgba(56, 189, 248, 0.15) !important;
@@ -45,14 +40,10 @@ st.markdown("""
         backdrop-filter: blur(12px) !important;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
-    
-    /* Cyber Sidebar styling */
     section[data-testid="stSidebar"] { 
         background-color: #0F172A !important; 
         border-right: 2px solid rgba(6, 180, 212, 0.2); 
     }
-    
-    /* Glow effect on Text inputs & Numeric fields */
     .stTextInput>div>div>input, .stNumberInput>div>div>input {
         background-color: #020617 !important;
         color: #38BDF8 !important;
@@ -65,8 +56,6 @@ st.markdown("""
         border-color: #06B6D4 !important; 
         box-shadow: 0 0 10px rgba(6, 182, 212, 0.5) !important;
     }
-    
-    /* Premium Futuristic Gradient Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%) !important;
         color: white !important;
@@ -80,11 +69,9 @@ st.markdown("""
         box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
     }
     .stButton>button:hover {
-        transform: translateY(-3px) scale(1.01) !important;
+        transform: translateY(-2px) scale(1.01) !important;
         box-shadow: 0 8px 25px rgba(6, 182, 212, 0.6) !important;
     }
-    
-    /* Customized Neon Tabs Selector */
     button[data-baseweb="tab"] { 
         font-size: 16px !important; 
         color: #64748B !important; 
@@ -95,15 +82,6 @@ st.markdown("""
         color: #38BDF8 !important; 
         font-weight: 800; 
         border-bottom: 3px solid #38BDF8 !important;
-    }
-    
-    /* Custom Stat Card Look */
-    .metric-card {
-        background: rgba(15, 23, 42, 0.6);
-        border: 1px dashed rgba(56, 189, 248, 0.3);
-        border-radius: 12px;
-        padding: 15px;
-        text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -216,3 +194,11 @@ with tab2:
                 for uploaded_file in uploaded_files:
                     try:
                         image = Image.open(uploaded_file)
+                        prompt = """Analyze this medical entrance exam question screenshot. Extract:
+                        1. The core MBBS Subject (out of the 19 standard subjects).
+                        2. The high-yield Topic/BTR concept.
+                        3. The core mistake/educational pearl.
+                        Provide ONLY a valid JSON object like this:
+                        {"Subject": "Pathology", "Topic": "Amyloidosis", "Core_Mistake": "Confused Apple-green birefringence with Congo Red stain properties"}
+                        Do not wrap it in markdown block fences."""
+                        
