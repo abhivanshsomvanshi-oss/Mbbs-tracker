@@ -1,3 +1,4 @@
+
 import streamlit as st
 import google.generativeai as genai
 from datetime import datetime
@@ -16,24 +17,15 @@ st.set_page_config(
 # Premium Graphics & Custom CSS Styling
 st.markdown("""
     <style>
-    /* Background and global fonts */
     .stApp { background-color: #0F172A; color: #E2E8F0; }
-    
-    /* Main Headers */
     h1, h2, h3 { color: #38BDF8 !important; font-family: 'Inter', sans-serif; font-weight: 700; }
-    
-    /* Premium Cards for Inputs */
     div[data-testid="stForm"], div.stBlock {
         background-color: #1E293B !important;
         border: 1px solid #334155 !important;
         border-radius: 12px !important;
         padding: 20px !important;
     }
-    
-    /* Sidebar styling */
     section[data-testid="stSidebar"] { background-color: #1E293B !important; border-right: 1px solid #334155; }
-    
-    /* Custom Styling for Time Slots Inputs */
     .stTextInput>div>div>input {
         background-color: #0F172A !important;
         color: #F8FAFC !important;
@@ -41,8 +33,6 @@ st.markdown("""
         border-radius: 8px !important;
     }
     .stTextInput>div>div>input:focus { border-color: #38BDF8 !important; }
-    
-    /* Premium Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%) !important;
         color: white !important;
@@ -57,8 +47,6 @@ st.markdown("""
         transform: translateY(-2px) !important;
         box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4) !important;
     }
-    
-    /* Tabs Customization */
     button[data-baseweb="tab"] { font-size: 16px !important; color: #94A3B8 !important; font-weight: 500; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #38BDF8 !important; font-weight: bold; border-bottom-color: #38BDF8 !important; }
     </style>
@@ -67,11 +55,13 @@ st.markdown("""
 st.title("🩺 MedBTR Smart AI Tracker")
 st.markdown("<p style='color: #94A3B8; font-size: 1.1rem;'>Optimize your 19 MBBS Subjects prep, audit hourly time leaks, and master high-yield QBank mistakes.</p>", unsafe_allow_html=True)
 
-# --- SIDEBAR: API KEY & ROBUST STORAGE ---
+# --- SIDEBAR: API KEY ---
 st.sidebar.markdown("<h2 style='font-size: 1.5rem;'>🔑 Control Panel</h2>", unsafe_allow_html=True)
 api_key = st.sidebar.text_input("Gemini API Key:", type="password", help="Get a free key from Google AI Studio")
 
-# Crash Protection: Initialize safely
+# Global variables for model
+model = None
+
 if api_key:
     try:
         genai.configure(api_key=api_key)
@@ -113,7 +103,7 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🧠 Generate AI Efficiency Audit"):
-        if not api_key:
+        if not api_key or model is None:
             st.error("Please add your Gemini API Key in the sidebar.")
         else:
             with st.spinner("AI is auditing your day..."):
@@ -124,7 +114,7 @@ with tab1:
                     prompt = f"Analyze this medical student's daily 24h schedule for MBBS/BTR preparation. Point out exactly where they can save time, track if they studied late night effectively, and give 3 bullet points on how to maximize focus tomorrow.\n\nSchedule:\n{schedule_text}"
                     try:
                         response = model.generate_content(prompt)
-                        st.markdown("<div style='background-color: #1E293B; padding: 15px; border-left: 4px solid #38BDF8; border-radius: 4px;'>", unsafe_allow_html=True)
+                        st.markdown("<div style='background-color: #1E293B; padding: 15px; border-left: 4px solid #38BDF8; border-radius: 4px; color: white;'>", unsafe_allow_html=True)
                         st.write(response.text)
                         st.markdown("</div>", unsafe_allow_html=True)
                     except Exception as e:
@@ -139,7 +129,7 @@ with tab2:
     uploaded_files = st.file_uploader("Upload Question Screenshots:", type=["png", "jpg", "jpeg"], accept_multiple_files=True)
     
     if st.button("🚀 Auto-Extract Mistakes"):
-        if not api_key:
+        if not api_key or model is None:
             st.error("Please configure the Gemini API Key.")
         elif not uploaded_files:
             st.warning("No files uploaded.")
@@ -163,7 +153,7 @@ with tab2:
                         st.session_state.qbank_errors.append(data)
                         st.toast(f"Successfully tracked: {data['Topic']}")
                     except Exception as e:
-                        st.error(f"Could not parse one of the screenshots. Ensuring app safety.")
+                        st.error("Could not parse one of the screenshots. Ensuring app safety.")
                 st.success("Batch execution completed!")
 
     if st.session_state.qbank_errors:
@@ -185,7 +175,7 @@ with tab3:
             st.rerun()
 
     if generate_report:
-        if not api_key:
+        if not api_key or model is None:
             st.error("API Key required.")
         else:
             with st.spinner("Generating deep high-yield diagnostic metrics..."):
@@ -204,3 +194,5 @@ with tab3:
                     st.markdown("---")
                     st.markdown("### 📘 Your Tailored Revision Strategy")
                     st.write(response.text)
+                except Exception as e:
+                    st.error(f"Analytics runtime error: {e}")
