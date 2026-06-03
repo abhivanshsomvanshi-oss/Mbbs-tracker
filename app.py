@@ -1,3 +1,4 @@
+
 import streamlit as st
 import google.generativeai as genai
 from datetime import datetime
@@ -13,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Premium Cyber Graphics Look
+# Premium Cyber Graphics Style Sheet
 st.markdown("""
     <style>
     .stApp { 
@@ -26,10 +27,7 @@ st.markdown("""
         font-weight: 800 !important; 
         text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
     }
-    h2, h3 { 
-        color: #06B6D4 !important; 
-        font-family: 'Inter', sans-serif; 
-    }
+    h2, h3 { color: #06B6D4 !important; font-family: 'Inter', sans-serif; }
     div[data-testid="stForm"], div.stBlock, .stTabs {
         background: rgba(30, 41, 59, 0.45) !important;
         border: 1px solid rgba(56, 189, 248, 0.15) !important;
@@ -116,14 +114,11 @@ with tab1:
                 st.warning("Data Void: Log at least a few hourly vectors.")
             else:
                 with st.spinner("Decoding timeline anomalies..."):
-                    try:
-                        prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
-                        response = model.generate_content(prompt)
-                        st.markdown("<div style='background: #020617; padding: 20px; border-left: 4px solid #06B6D4; border-radius: 8px;'>", unsafe_allow_html=True)
-                        st.write(response.text)
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    except Exception as audit_err:
-                        st.error(f"Execution Error: {audit_err}")
+                    prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
+                    response = model.generate_content(prompt)
+                    st.markdown("<div style='background: #020617; padding: 20px; border-left: 4px solid #06B6D4; border-radius: 8px;'>", unsafe_allow_html=True)
+                    st.write(response.text)
+                    st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================== TAB 2: METRICS & ERROR INGESTION ====================
 with tab2:
@@ -175,7 +170,7 @@ with tab2:
 
 # ==================== TAB 3: DIAGNOSTICS ====================
 with tab3:
-    st.markdown("### 📊 Executive Performance Metrics")
+    st.markdown("### 📊 High-Yield Executive Performance Metrics")
     report_type = st.selectbox("Select Range Vector:", ["Daily Summary", "Weekly Performance Report", "Monthly Analytics Diagnostic"])
     
     col_b1, col_b2 = st.columns(2)
@@ -205,4 +200,4 @@ with tab3:
                 if st.session_state.qbank_errors:
                     qbank_summary = pd.DataFrame(st.session_state.qbank_errors).to_string(index=False)
                 
-                try:
+                prompt = f"Create a tactical {report_type} for an MBBS student based on this data:\nNotes Pages & QBank:\n{metrics_summary}\n\nErrors:\n{qbank_summary}\n\nTime logs:\n{all_schedules}\n\nGive: 1. Pages velocity & QBank accuracy rate %, 2. Weakest subjects/topics cluster, 3. Strategic BTR review counter-attack plan."
