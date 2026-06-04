@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Ultra-Premium Minimalist Layout CSS (Guaranteed Mobile Safe Rendering)
+# Ultra-Premium Custom Styling for Mobile Layout
 st.markdown("""
     <style>
     .stApp { 
@@ -73,8 +73,6 @@ st.markdown("""
     label { color: #4A5568 !important; font-size: 0.8rem !important; font-weight: 700; }
     button[data-baseweb="tab"] { font-size: 12px !important; color: #4A5568 !important; font-weight: 700; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #38BDF8 !important; border-bottom-color: #38BDF8 !important; }
-    
-    /* Native Purple Action Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
         color: white !important;
@@ -107,7 +105,7 @@ if api_key:
     model = genai.GenerativeModel('gemini-2.5-flash')
     st.sidebar.success("🔗 AI Core Linked")
 
-# Initialize Session Data safely to avoid local variables void
+# Initialize Session Data safely
 if 'daily_logs' not in st.session_state:
     st.session_state.daily_logs = {}
 if 'study_metrics' not in st.session_state:
@@ -115,7 +113,7 @@ if 'study_metrics' not in st.session_state:
 if 'qbank_errors' not in st.session_state:
     st.session_state.qbank_errors = []
 
-# Safe Math Engine fallback vectors to prevent blank layout crash
+# Safe Math Engine
 s_days = len(st.session_state.study_metrics)
 t_pages = 0
 q_sessions = 0
@@ -218,3 +216,5 @@ with tab2:
                 for uploaded_file in uploaded_files:
                     image = Image.open(uploaded_file)
                     prompt = "Analyze this medical question screenshot. Extract core MBBS Subject, high-yield Topic, and core mistake. Output strictly as JSON like this: {'Subject': 'Pathology', 'Topic': 'Amyloidosis', 'Core_Mistake': 'stain error'}"
+                    response = model.generate_content([prompt, image])
+                    clean_text = response.text.strip().replace("```json", "").replace("```", "")
