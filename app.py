@@ -50,25 +50,13 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
-    .card-icon {
-        font-size: 1.5rem;
-        margin-bottom: 2px;
-    }
-    .card-value {
-        font-size: 2rem;
-        font-weight: 800;
-        margin: 2px 0;
-    }
+    .card-icon { font-size: 1.5rem; margin-bottom: 2px; }
+    .card-value { font-size: 2rem; font-weight: 800; margin: 2px 0; }
     .card-value.blue { color: #6366F1; }
     .card-value.green { color: #10B981; }
     .card-value.cyan { color: #06B6D4; }
     .card-value.red { color: #EF4444; }
-    .card-title {
-        color: #4A5568;
-        font-size: 0.75rem;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
+    .card-title { color: #4A5568; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
     .section-title {
         color: #E2E8F0 !important;
         font-size: 1rem !important;
@@ -82,20 +70,9 @@ st.markdown("""
         border: 1px solid #1E2330 !important;
         border-radius: 12px !important;
     }
-    label {
-        color: #4A5568 !important;
-        font-size: 0.8rem !important;
-        font-weight: 700 !important;
-    }
-    button[data-baseweb="tab"] { 
-        font-size: 12px !important; 
-        color: #4A5568 !important; 
-        font-weight: 700;
-    }
-    button[data-baseweb="tab"][aria-selected="true"] { 
-        color: #38BDF8 !important; 
-        border-bottom-color: #38BDF8 !important;
-    }
+    label { color: #4A5568 !important; font-size: 0.8rem !important; font-weight: 700; }
+    button[data-baseweb="tab"] { font-size: 12px !important; color: #4A5568 !important; font-weight: 700; }
+    button[data-baseweb="tab"][aria-selected="true"] { color: #38BDF8 !important; border-bottom-color: #38BDF8 !important; }
     .stButton>button {
         background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
         color: white !important;
@@ -124,14 +101,9 @@ api_key = st.sidebar.text_input("Gemini Neural API Key:", type="password")
 
 model = None
 if api_key:
-    try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        st.sidebar.success("🔗 AI Core Linked Successfully")
-    except Exception as e:
-        st.sidebar.error("API configuration error.")
-else:
-    st.sidebar.info("📡 System Offline: Enter API Key to activate AI.")
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-2.5-flash')
+    st.sidebar.success("🔗 AI Core Linked Successfully")
 
 # Initialize Session Data Safely
 if 'daily_logs' not in st.session_state:
@@ -173,19 +145,18 @@ with tab1:
 
     st.markdown("<br>", unsafe_allow_html=True)
     if st.button("🧠 INITIALIZE TIME-LEAK DIAGNOSTIC", key="btn_audit"):
-        if not api_key or model is None:
-            st.error("Operation Aborted: AI Neural Key Missing.")
+        schedule_text = "\n".join([f"{k}: {v}" for k, v in st.session_state.daily_logs[selected_date].items() if v.strip()])
+        if not api_key:
+            st.error("API Key Missing in sidebar.")
+        elif not schedule_text.strip():
+            st.warning("Please fill your hours log first.")
         else:
-            schedule_text = "\n".join([f"{k}: {v}" for k, v in st.session_state.daily_logs[selected_date].items() if v.strip()])
-            if not schedule_text.strip():
-                st.warning("Data Void: Log at least a few hourly vectors.")
-            else:
-                with st.spinner("Decoding timeline anomalies..."):
-                    prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
-                    response = model.generate_content(prompt)
-                    st.markdown("<div style='background: #11141D; padding: 20px; border-left: 4px solid #38BDF8; border-radius: 12px; color: #E2E8F0;'>", unsafe_allow_html=True)
-                    st.write(response.text)
-                    st.markdown("</div>", unsafe_allow_html=True)
+            with st.spinner("Decoding timeline anomalies..."):
+                prompt = f"Analyze this medical student's schedule for MBBS prep. Point out time leaks and provide 3 actionable focus points.\n\nSchedule:\n{schedule_text}"
+                response = model.generate_content(prompt)
+                st.markdown("<div style='background: #11141D; padding: 20px; border-left: 4px solid #38BDF8; border-radius: 12px; color: #E2E8F0;'>", unsafe_allow_html=True)
+                st.write(response.text)
+                st.markdown("</div>", unsafe_allow_html=True)
 
 # ==================== TAB 2: READING & QBANK ENTRY ====================
 with tab2:
@@ -216,14 +187,13 @@ with tab2:
     if st.button("📖 Session Save Karo", key="btn_save_metrics"):
         if metric_date not in st.session_state.study_metrics:
             st.session_state.study_metrics[metric_date] = {"btr_pages": 0, "q_solved": 0, "q_incorrect": 0}
-        
         st.session_state.study_metrics[metric_date]["btr_pages"] += pages_read
         st.session_state.study_metrics[metric_date]["q_solved"] += q_solved
         st.session_state.study_metrics[metric_date]["q_incorrect"] += q_incorrect
         st.success(f"✓ Metrics Saved successfully!")
         st.rerun()
 
-    # --- SCREENSHOT ERROR PARSER WITH FLAT PROTECTION SYSTEM ---
+    # --- SCREENSHOT ERROR PARSER WITH TOTAL FLAT SECURITY ---
     st.markdown("<br><hr style='border-color:#1E2330;'><br>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🚀 Multimodal QBank Screenshot Error Parser</div>", unsafe_allow_html=True)
     uploaded_files = st.file_uploader("Drop Question Screenshots Here:", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="screenshots")
@@ -232,7 +202,11 @@ with tab2:
     
     if st.button("🧬 TRIGGER NEURAL ERROR MAPPING", key="btn_error_parse"):
         if not api_key:
-            st.error("API Error: Missing Neural Key. Add it in the sidebar.")
+            st.error("API Key Missing! Please add Gemini API Key in the sidebar.")
         elif not uploaded_files:
-            st.warning("Data Void: Drop clear question screenshots first.")
+            st.warning("No files uploaded! Drop clear question screenshots first.")
         else:
+            with St.spinner("Parsing medical imagery and mapping concepts..."):
+                for uploaded_file in uploaded_files:
+                    image = Image.open(uploaded_file)
+                    prompt = "Analyze this medical question screenshot. Extract core MBBS Subject, high-yield Topic, and core mistake. Output strictly as JSON like this: {'Subject': 'Pathology', 'Topic': 'Amyloidosis', 'Core_Mistake': 'stain error'}"
