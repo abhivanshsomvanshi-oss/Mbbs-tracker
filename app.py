@@ -223,14 +223,16 @@ with tab2:
         st.success(f"✓ Metrics Saved successfully!")
         st.rerun()
 
-    # --- HERE IS THE FIXED SCREENSHOT ERROR PARSER SECTION ---
+    # --- SCREENSHOT ERROR PARSER WITH FLAT PROTECTION SYSTEM ---
     st.markdown("<br><hr style='border-color:#1E2330;'><br>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🚀 Multimodal QBank Screenshot Error Parser</div>", unsafe_allow_html=True)
     uploaded_files = st.file_uploader("Drop Question Screenshots Here:", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="screenshots")
     
-    # NEW FIXED BUTTON PLACEMENT BELOW THE FILE UPLOADER
     st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+    
     if st.button("🧬 TRIGGER NEURAL ERROR MAPPING", key="btn_error_parse"):
-        if not api_key or model is None:
-            st.error("Operation Aborted: AI Engine Offline. Please add Gemini API Key.")
+        if not api_key:
+            st.error("API Error: Missing Neural Key. Add it in the sidebar.")
         elif not uploaded_files:
+            st.warning("Data Void: Drop clear question screenshots first.")
+        else:
