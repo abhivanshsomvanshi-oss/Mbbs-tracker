@@ -13,17 +13,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Ultra-Premium Custom Styling (Matching your exact screenshot dashboard grids)
+# Ultra-Premium Custom Styling for Mobile Layout
 st.markdown("""
     <style>
-    /* Global Container */
     .stApp { 
         background: #090B10 !important; 
         color: #A0AEC0 !important;
         font-family: 'Inter', sans-serif;
     }
-    
-    /* Header Block */
     .app-header {
         padding: 5px 0px;
         margin-bottom: 20px;
@@ -39,50 +36,44 @@ st.markdown("""
         font-size: 0.85rem !important;
         margin-top: -3px;
     }
-
-    /* Grid Dashboard Grid Styles (Cards from image) */
     .dashboard-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        margin-bottom: 25px;
+        gap: 12px;
+        margin-bottom: 20px;
     }
     .dashboard-card {
         background: #11141D !important;
         border: 1px solid #1E2330 !important;
-        border-radius: 16px;
-        padding: 20px;
+        border-radius: 14px;
+        padding: 15px;
         text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     .card-icon {
-        font-size: 1.8rem;
-        margin-bottom: 5px;
+        font-size: 1.5rem;
+        margin-bottom: 2px;
     }
     .card-value {
-        font-size: 2.2rem;
+        font-size: 2rem;
         font-weight: 800;
-        margin: 5px 0;
+        margin: 2px 0;
     }
-    .card-value.blue { color: #5F3AF3; }
+    .card-value.blue { color: #6366F1; }
     .card-value.green { color: #10B981; }
     .card-value.cyan { color: #06B6D4; }
     .card-value.red { color: #EF4444; }
     .card-title {
         color: #4A5568;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
     }
-
-    /* Form Section Controls */
     .section-title {
         color: #E2E8F0 !important;
         font-size: 1rem !important;
         font-weight: 700 !important;
         text-transform: uppercase;
-        letter-spacing: 0.5px;
         margin-bottom: 12px;
     }
     .stTextInput>div>div>input, .stNumberInput>div>div>input, .stSelectbox>div>div>div {
@@ -95,37 +86,26 @@ st.markdown("""
         color: #4A5568 !important;
         font-size: 0.8rem !important;
         font-weight: 700 !important;
-        text-transform: uppercase;
     }
-
-    /* Tabs Styling */
     button[data-baseweb="tab"] { 
-        font-size: 13px !important; 
+        font-size: 12px !important; 
         color: #4A5568 !important; 
         font-weight: 700;
-        text-transform: uppercase;
     }
     button[data-baseweb="tab"][aria-selected="true"] { 
         color: #38BDF8 !important; 
         border-bottom-color: #38BDF8 !important;
     }
-
-    /* 1-Click Premium Button Style matching image purple color */
     .stButton>button {
         background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 12px !important;
-        padding: 16px 20px !important;
+        padding: 15px 20px !important;
         font-weight: 700 !important;
-        font-size: 1.1rem !important;
+        font-size: 1rem !important;
         width: 100% !important;
         box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        transition: all 0.2s ease;
-    }
-    .stButton>button:hover {
-        background: #4338CA !important;
-        transform: translateY(-1px);
     }
     </style>
 """, unsafe_allow_html=True)
@@ -144,9 +124,12 @@ api_key = st.sidebar.text_input("Gemini Neural API Key:", type="password")
 
 model = None
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash')
-    st.sidebar.success("🔗 AI Core Linked Successfully")
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        st.sidebar.success("🔗 AI Core Linked Successfully")
+    except Exception as e:
+        st.sidebar.error("API configuration error.")
 else:
     st.sidebar.info("📡 System Offline: Enter API Key to activate AI.")
 
@@ -158,7 +141,7 @@ if 'study_metrics' not in st.session_state:
 if 'qbank_errors' not in st.session_state:
     st.session_state.qbank_errors = []
 
-# Raw Numbers Engine Calculations for Dashboard Cards
+# Raw Metrics Math
 study_days_count = max(len(st.session_state.study_metrics), 1)
 total_pages_accumulated = sum([v.get("btr_pages", 0) for v in st.session_state.study_metrics.values()])
 total_qbank_sessions = sum([1 for v in st.session_state.study_metrics.values() if v.get("q_solved", 0) > 0])
@@ -167,7 +150,7 @@ total_wrong_answers = sum([v.get("q_incorrect", 0) for v in st.session_state.stu
 # Native Navigation Tabs System
 tab1, tab2, tab3 = st.tabs(["📆 Daily Log", "📚 Reading & QBank", "📊 Reports & Analytics"])
 
-# ==================== TAB 1: DAILY LOG (TIME AUDIT) ====================
+# ==================== TAB 1: DAILY LOG ====================
 with tab1:
     st.markdown("<div class='section-title'>🕒 Chronological Log Grid (00:00 - 00:00)</div>", unsafe_allow_html=True)
     selected_date = st.date_input("Target Date Vector:", datetime.today(), key="date_tab1").strftime("%Y-%m-%d")
@@ -240,7 +223,14 @@ with tab2:
         st.success(f"✓ Metrics Saved successfully!")
         st.rerun()
 
+    # --- HERE IS THE FIXED SCREENSHOT ERROR PARSER SECTION ---
     st.markdown("<br><hr style='border-color:#1E2330;'><br>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🚀 Multimodal QBank Screenshot Error Parser</div>", unsafe_allow_html=True)
     uploaded_files = st.file_uploader("Drop Question Screenshots Here:", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="screenshots")
     
+    # NEW FIXED BUTTON PLACEMENT BELOW THE FILE UPLOADER
+    st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
+    if st.button("🧬 TRIGGER NEURAL ERROR MAPPING", key="btn_error_parse"):
+        if not api_key or model is None:
+            st.error("Operation Aborted: AI Engine Offline. Please add Gemini API Key.")
+        elif not uploaded_files:
