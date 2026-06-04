@@ -101,9 +101,12 @@ api_key = st.sidebar.text_input("Gemini Neural API Key:", type="password")
 
 model = None
 if api_key:
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel('gemini-2.5-flash')
-    st.sidebar.success("🔗 AI Core Linked Successfully")
+    try:
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        st.sidebar.success("🔗 AI Core Linked Successfully")
+    except Exception as e:
+        st.sidebar.error("Key Error")
 
 # Initialize Session Data Safely
 if 'daily_logs' not in st.session_state:
@@ -114,7 +117,7 @@ if 'qbank_errors' not in st.session_state:
     st.session_state.qbank_errors = []
 
 # Raw Metrics Math
-study_days_count = max(len(st.session_state.study_metrics), 1)
+study_days_count = max(len(st.session_state.study_metrics), 0)
 total_pages_accumulated = sum([v.get("btr_pages", 0) for v in st.session_state.study_metrics.values()])
 total_qbank_sessions = sum([1 for v in st.session_state.study_metrics.values() if v.get("q_solved", 0) > 0])
 total_wrong_answers = sum([v.get("q_incorrect", 0) for v in st.session_state.study_metrics.values()]) + len(st.session_state.qbank_errors)
@@ -193,7 +196,6 @@ with tab2:
         st.success(f"✓ Metrics Saved successfully!")
         st.rerun()
 
-    # --- SCREENSHOT ERROR PARSER WITH TOTAL FLAT SECURITY ---
     st.markdown("<br><hr style='border-color:#1E2330;'><br>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🚀 Multimodal QBank Screenshot Error Parser</div>", unsafe_allow_html=True)
     uploaded_files = st.file_uploader("Drop Question Screenshots Here:", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="screenshots")
@@ -206,7 +208,8 @@ with tab2:
         elif not uploaded_files:
             st.warning("No files uploaded! Drop clear question screenshots first.")
         else:
-            with St.spinner("Parsing medical imagery and mapping concepts..."):
+            with st.spinner("Parsing medical imagery and mapping concepts..."):
                 for uploaded_file in uploaded_files:
-                    image = Image.open(uploaded_file)
-                    prompt = "Analyze this medical question screenshot. Extract core MBBS Subject, high-yield Topic, and core mistake. Output strictly as JSON like this: {'Subject': 'Pathology', 'Topic': 'Amyloidosis', 'Core_Mistake': 'stain error'}"
+                    try:
+                        image = Image.open(uploaded_file)
+                        prompt = "Analyze this medical question screenshot. Extract core MBBS Subject, high-yield Topic, and core mistake. Output strictly as JSON like this: {'Subject': 'Pathology', 'Topic': 'Amyloidosis', 'Core_Mistake': 'stain error'}"
