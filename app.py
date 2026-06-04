@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# Ultra-Premium Custom Styling for Mobile Layout
+# Ultra-Premium Minimalist Layout CSS (Guaranteed Mobile Safe Rendering)
 st.markdown("""
     <style>
     .stApp { 
@@ -73,6 +73,8 @@ st.markdown("""
     label { color: #4A5568 !important; font-size: 0.8rem !important; font-weight: 700; }
     button[data-baseweb="tab"] { font-size: 12px !important; color: #4A5568 !important; font-weight: 700; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #38BDF8 !important; border-bottom-color: #38BDF8 !important; }
+    
+    /* Native Purple Action Buttons */
     .stButton>button {
         background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
         color: white !important;
@@ -90,7 +92,7 @@ st.markdown("""
 # Top Native Header Block
 st.markdown("""
     <div class='app-header'>
-        <div class='app-title'>🩺 MedTracker Pro</div>
+        <div class='app-title'>MedTracker Pro</div>
         <div class='app-subtitle'>MBBS 19-Subject System • Daily Log + Reading + QBank + AI Reports</div>
     </div>
 """, unsafe_allow_html=True)
@@ -99,14 +101,13 @@ st.markdown("""
 st.sidebar.markdown("### 🧬 SECURE AI CORE")
 api_key = st.sidebar.text_input("Gemini Neural API Key:", type="password")
 
-# Handle global model generation configuration cleanly
 model = None
 if api_key:
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-2.5-flash')
     st.sidebar.success("🔗 AI Core Linked")
 
-# Initialize Session Data Safely
+# Initialize Session Data safely to avoid local variables void
 if 'daily_logs' not in st.session_state:
     st.session_state.daily_logs = {}
 if 'study_metrics' not in st.session_state:
@@ -114,11 +115,18 @@ if 'study_metrics' not in st.session_state:
 if 'qbank_errors' not in st.session_state:
     st.session_state.qbank_errors = []
 
-# Raw Metrics Math Summary Engine
-study_days_count = len(st.session_state.study_metrics)
-total_pages_accumulated = sum([v.get("btr_pages", 0) for v in st.session_state.study_metrics.values()])
-total_qbank_sessions = sum([1 for v in st.session_state.study_metrics.values() if v.get("q_solved", 0) > 0])
-total_wrong_answers = sum([v.get("q_incorrect", 0) for v in st.session_state.study_metrics.values()]) + len(st.session_state.qbank_errors)
+# Safe Math Engine fallback vectors to prevent blank layout crash
+s_days = len(st.session_state.study_metrics)
+t_pages = 0
+q_sessions = 0
+t_wrong = len(st.session_state.qbank_errors)
+
+for metric_key in st.session_state.study_metrics:
+    data_block = st.session_state.study_metrics[metric_key]
+    t_pages += data_block.get("btr_pages", 0)
+    t_wrong += data_block.get("q_incorrect", 0)
+    if data_block.get("q_solved", 0) > 0:
+        q_sessions += 1
 
 # Native Navigation Tabs System
 tab1, tab2, tab3 = st.tabs(["📆 Daily Log", "📚 Reading & QBank", "📊 Reports & Analytics"])
@@ -194,20 +202,19 @@ with tab2:
         st.success(f"✓ Metrics Saved successfully!")
         st.rerun()
 
-    # --- SCREENSHOT ERROR PARSER WITH FLAT NON-NESTED PROCESSING ---
     st.markdown("<br><hr style='border-color:#1E2330;'><br>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>🚀 Multimodal QBank Screenshot Error Parser</div>", unsafe_allow_html=True)
     uploaded_files = st.file_uploader("Drop Question Screenshots Here:", type=["png", "jpg", "jpeg"], accept_multiple_files=True, key="screenshots")
     
     st.markdown("<div style='margin-top: 10px;'></div>", unsafe_allow_html=True)
     
-    # Flat linear error parser execute framework
     if st.button("🧬 TRIGGER NEURAL ERROR MAPPING", key="btn_error_parse"):
         if not api_key:
             st.error("API Key Missing! Please add Gemini API Key in the sidebar.")
         elif not uploaded_files:
             st.warning("No files uploaded! Drop clear question screenshots first.")
         else:
-            with st.spinner("Parsing medical imagery and mapping concepts..."):
+            with st.spinner("Parsing medical imagery..."):
                 for uploaded_file in uploaded_files:
                     image = Image.open(uploaded_file)
+                    prompt = "Analyze this medical question screenshot. Extract core MBBS Subject, high-yield Topic, and core mistake. Output strictly as JSON like this: {'Subject': 'Pathology', 'Topic': 'Amyloidosis', 'Core_Mistake': 'stain error'}"
